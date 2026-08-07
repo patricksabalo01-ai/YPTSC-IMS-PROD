@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+Low Stock Alerts | YPTSC IMS
+
+{% endblock %}
+
+
+{% block css %}
+
+<link
+  rel="stylesheet"
+  href="{{ url_for(
+    'static',
+    filename='css/low_stock.css'
+  ) }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- ==================================
+     PAGE HEADER
+================================== -->
+
+<section class="page-header">
+
+  <div>
+
+    <h1>
+
+      Low Stock Alerts
+
+    </h1>
+
+    <p>
+
+      Monitor available units and total parts stock.
+
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- ==================================
+     SUMMARY CARDS
+================================== -->
+
+<section class="low-stock-summary">
+
+
+  <div class="summary-card">
+
+    <div class="summary-icon">
+
+      <i class="fa-solid fa-triangle-exclamation"></i>
+
+    </div>
+
+
+    <div>
+
+      <span>
+
+        Active Alerts
+
+      </span>
+
+
+      <strong>
+
+        {{ low_stock_data.alert_count }}
+
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-icon">
+
+      <i class="fa-solid fa-print"></i>
+
+    </div>
+
+
+    <div>
+
+      <span>
+
+        Available Units
+
+      </span>
+
+
+      <strong>
+
+        {{ low_stock_data.available_units }}
+
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <div class="summary-icon">
+
+      <i class="fa-solid fa-boxes-stacked"></i>
+
+    </div>
+
+
+    <div>
+
+      <span>
+
+        Total Parts Stock
+
+      </span>
+
+
+      <strong>
+
+        {{ low_stock_data.total_parts }}
+
+      </strong>
+
+    </div>
+
+  </div>
+
+
+</section>
+
+
+<!-- ==================================
+     LOW STOCK TABLE
+================================== -->
+
+<section class="low-stock-card">
+
+
+  <!-- HEADER -->
+
+  <div class="low-stock-card-header">
+
+
+    <div>
+
+      <h2>
+
+        Inventory Stock Monitor
+
+      </h2>
+
+
+      <p>
+
+        Low-stock limit:
+
+        {{ low_stock_data.low_stock_limit }}
+
+      </p>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="low-stock-filters">
+
+
+      <!-- SEARCH -->
+
+      <div class="search-box">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+          type="search"
+          id="lowStockSearch"
+          placeholder="Search inventory..."
+        >
+
+      </div>
+
+
+      <!-- TYPE FILTER -->
+
+      <select
+        id="inventoryTypeFilter"
+      >
+
+        <option value="all">
+
+          All Inventory
+
+        </option>
+
+        <option value="unit">
+
+          Units
+
+        </option>
+
+        <option value="part">
+
+          Parts
+
+        </option>
+
+      </select>
+
+
+      <!-- STATUS FILTER -->
+
+      <select
+        id="alertStatusFilter"
+      >
+
+        <option value="all">
+
+          All Status
+
+        </option>
+
+        <option value="low stock">
+
+          Low Stock
+
+        </option>
+
+        <option value="out of stock">
+
+          Out of Stock
+
+        </option>
+
+        <option value="normal">
+
+          Normal
+
+        </option>
+
+      </select>
+
+
+    </div>
+
+  </div>
+
+
+  <!-- TABLE -->
+
+  <div class="table-wrapper">
+
+
+    <table class="low-stock-table">
+
+
+      <thead>
+
+        <tr>
+
+          <th>
+
+            Inventory
+
+          </th>
+
+          <th>
+
+            Description
+
+          </th>
+
+          <th>
+
+            Current Count
+
+          </th>
+
+          <th>
+
+            Low-Stock Limit
+
+          </th>
+
+          <th>
+
+            Status
+
+          </th>
+
+        </tr>
+
+      </thead>
+
+
+      <tbody
+        id="lowStockTableBody"
+      >
+
+
+        {% for item in low_stock_data["items"] %}
+
+
+        <tr
+
+          data-type="{{ item.inventory_type|lower }}"
+
+          data-status="{{ item.alert_status|lower }}"
+
+          data-search="
+
+            {{ item.inventory_type }}
+
+            {{ item.item_name }}
+
+          "
+
+        >
+
+
+          <td>
+
+            <span class="inventory-type">
+
+              {% if item.inventory_type == "Unit" %}
+
+              <i class="fa-solid fa-print"></i>
+
+              {% else %}
+
+              <i class="fa-solid fa-boxes-stacked"></i>
+
+              {% endif %}
+
+
+              {{ item.inventory_type }}
+
+            </span>
+
+          </td>
+
+
+          <td>
+
+            {{ item.item_name }}
+
+          </td>
+
+
+          <td>
+
+            <strong>
+
+              {{ item.current_count }}
+
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            {{ item.minimum_count }}
+
+          </td>
+
+
+          <td>
+
+            <span
+
+              class="alert-badge
+
+              {{ item.alert_status
+                 |lower
+                 |replace(' ', '-') }}"
+
+            >
+
+              {{ item.alert_status }}
+
+            </span>
+
+          </td>
+
+
+        </tr>
+
+
+        {% endfor %}
+
+
+        <!-- NO FILTER RESULTS -->
+
+        <tr
+          id="noResultsRow"
+          hidden
+        >
+
+          <td
+            colspan="5"
+            class="no-results"
+          >
+
+            No inventory matches your filters.
+
+          </td>
+
+        </tr>
+
+
+      </tbody>
+
+
+    </table>
+
+  </div>
+
+
+</section>
+
+
+{% endblock %}
+
+
+{% block javascript %}
+
+<script
+  src="{{ url_for(
+    'static',
+    filename='js/low_stock.js'
+  ) }}"
+  defer
+></script>
+
+{% endblock %}

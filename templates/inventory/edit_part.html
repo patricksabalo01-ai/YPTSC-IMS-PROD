@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Part
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-container">
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>
+                Edit Part
+            </h1>
+
+            <p>
+                Update the selected part information.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for(
+                'inventory.parts_inventory'
+            ) }}"
+            class="btn-secondary"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back
+
+        </a>
+
+    </div>
+
+
+    <div class="form-card">
+
+        <form
+            method="POST"
+        >
+
+            <div class="form-grid">
+
+                <!-- CATEGORY -->
+
+                <div class="form-group">
+
+                    <label>
+                        Category
+                    </label>
+
+                    <select
+                        name="category"
+                        required
+                    >
+
+                        <option
+                            value="Spare Parts"
+                            {% if part.category == "Spare Parts" %}
+                            selected
+                            {% endif %}
+                        >
+                            Spare Parts
+                        </option>
+
+                        <option
+                            value="Consumables"
+                            {% if part.category == "Consumables" %}
+                            selected
+                            {% endif %}
+                        >
+                            Consumables
+                        </option>
+
+                        <option
+                            value="Toner"
+                            {% if part.category == "Toner" %}
+                            selected
+                            {% endif %}
+                        >
+                            Toner
+                        </option>
+
+                        <option
+                            value="Ink"
+                            {% if part.category == "Ink" %}
+                            selected
+                            {% endif %}
+                        >
+                            Ink
+                        </option>
+
+                        <option
+                            value="Office Supplies"
+                            {% if part.category == "Office Supplies" %}
+                            selected
+                            {% endif %}
+                        >
+                            Office Supplies
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- PART NUMBER -->
+
+                <div class="form-group">
+
+                    <label>
+                        Part Number
+                    </label>
+
+                    <input
+                        type="text"
+                        name="part_number"
+                        value="{{ part.part_number }}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label>
+                        Description
+                    </label>
+
+                    <input
+                        type="text"
+                        name="description"
+                        value="{{ part.description }}"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- BRAND -->
+
+                <div class="form-group">
+
+                    <label>
+                        Brand
+                    </label>
+
+                    <input
+                        type="text"
+                        name="brand"
+                        value="{{ part.brand or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- COMPATIBLE MODEL -->
+
+                <div class="form-group">
+
+                    <label>
+                        Compatible Model
+                    </label>
+
+                    <input
+                        type="text"
+                        name="compatible_model"
+                        value="{{ part.compatible_model or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- SUPPLIER -->
+
+                <div class="form-group">
+
+                    <label>
+                        Supplier
+                    </label>
+
+                    <input
+                        type="text"
+                        name="supplier"
+                        value="{{ part.supplier or '' }}"
+                    >
+
+                </div>
+
+
+                <!-- STOCK -->
+
+                <div class="form-group">
+
+                    <label>
+                        Current Stock
+                    </label>
+
+                    <input
+                        type="number"
+                        name="stock"
+                        value="{{ part.stock }}"
+                        min="0"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- MINIMUM STOCK -->
+
+                <div class="form-group">
+
+                    <label>
+                        Minimum Stock
+                    </label>
+
+                    <input
+                        type="number"
+                        name="minimum_stock"
+                        value="{{ part.minimum_stock }}"
+                        min="0"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- LOCATION -->
+
+                <div class="form-group">
+
+                    <label>
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        name="location"
+                        value="{{ part.location or '' }}"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- REMARKS -->
+
+            <div class="form-group">
+
+                <label>
+                    Remarks
+                </label>
+
+                <textarea
+                    name="remarks"
+                    rows="4"
+                >{{ part.remarks or '' }}</textarea>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="form-actions">
+
+                <a
+                    href="{{ url_for(
+                        'inventory.parts_inventory'
+                    ) }}"
+                    class="btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+
+                    <i class="fa-solid fa-floppy-disk"></i>
+
+                    Save Changes
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

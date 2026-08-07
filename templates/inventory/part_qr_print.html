@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+Print Part QR | YPTSC IMS
+
+{% endblock %}
+
+
+{% block css %}
+
+<link
+  rel="stylesheet"
+  href="{{ url_for(
+    'static',
+    filename='css/inventory.css'
+  ) }}"
+/>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="qr-print-page">
+
+
+  <div class="qr-label">
+
+
+    <!-- COMPANY -->
+
+    <h3>
+
+      YPTSC IMS
+
+    </h3>
+
+
+    <!-- QR IMAGE -->
+
+    <img
+      src="{{ url_for(
+        'static',
+        filename=part.qr_code
+      ) }}"
+      class="qr-preview"
+      alt="QR Code for {{ part.part_code }}"
+    />
+
+
+    <!-- PART INFORMATION -->
+
+    <div class="qr-info">
+
+
+      <h4>
+
+        {{ part.part_code }}
+
+      </h4>
+
+
+      <p>
+
+        <strong>
+
+          {{ part.description }}
+
+        </strong>
+
+      </p>
+
+
+      <p>
+
+        Part Number:
+
+        {{ part.part_number }}
+
+      </p>
+
+
+      <p>
+
+        Category:
+
+        {{ part.category }}
+
+      </p>
+
+
+      {% if part.brand %}
+
+      <p>
+
+        Brand:
+
+        {{ part.brand }}
+
+      </p>
+
+      {% endif %}
+
+
+      {% if part.compatible_model %}
+
+      <p>
+
+        Compatible:
+
+        {{ part.compatible_model }}
+
+      </p>
+
+      {% endif %}
+
+
+      <p>
+
+        Stock:
+
+        {{ part.stock }}
+
+      </p>
+
+
+      {% if part.location %}
+
+      <p>
+
+        Location:
+
+        {{ part.location }}
+
+      </p>
+
+      {% endif %}
+
+
+    </div>
+
+
+  </div>
+
+
+  <!-- PRINT BUTTON -->
+
+  <button
+    type="button"
+    onclick="window.print()"
+    class="btn-primary"
+  >
+
+    <i class="fa-solid fa-print"></i>
+
+    Print QR
+
+  </button>
+
+
+</section>
+
+
+{% endblock %}

@@ -1,0 +1,43 @@
+DEPLOYMENT FIX SUMMARY
+======================
+
+Implemented flow:
+- Select one or multiple available units.
+- Select one Sales Agent and one Technician.
+- Submit shared deployment details once.
+- Create one row in the deployment table for EACH selected unit.
+- Every created row receives the same company_name, sales_agent_id,
+  technician_id, contract/deployment details, meters, and remarks.
+- Every successfully deployed unit changes from Available to Installed.
+- The whole save uses one database transaction: if any selected unit is
+  invalid/unavailable, no partial deployment is committed.
+
+Files updated:
+- app/routes/deployment.py
+- app/models/deployment.py
+- templates/deployment/deployment.html
+- static/js/deployment.js
+- templates/admin/register_user.html
+- templates/admin/update_user.html
+- app/routes/admin.py
+
+Important Sales role fix:
+- The Register User form previously displayed "Sales" but submitted the value
+  "Technician". This is now corrected to value="Sales".
+- Update User now includes Sales as a selectable role.
+- Existing accounts that were intended to be Sales but were previously saved
+  as Technician must be edited once in User Management and changed to Sales.
+
+Validation added:
+- Requires at least one selected unit.
+- Requires company name, Sales Agent, and Technician.
+- Confirms users are active and have the expected roles.
+- Confirms all selected units still exist and are Available before saving.
+- Validates contract dates, monthly rate, and meter values.
+- Prevents negative rate/meter values.
+- Prevents contract end date from being before contract start date.
+
+Recommendation:
+- Currently black_meter and color_meter are shared form values, so the same
+  readings are copied to every selected unit. If each printer needs its own
+  initial meter reading, make meter inputs per selected unit in a later update.

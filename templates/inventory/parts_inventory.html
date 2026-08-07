@@ -1,0 +1,782 @@
+{% extends "base.html" %} {% block title %} Parts Inventory | YPTSC IMS {%
+endblock %} {% block css %}
+
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/inventory.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for(
+    'static',
+    filename='css/modal.css'
+  ) }}"
+/>
+
+<link
+  rel="stylesheet"
+  href="{{ url_for(
+    'static',
+    filename='css/parts_inventory.css'
+  ) }}"
+/>
+{% endblock %} {% block content %}
+
+<section class="page-header">
+  <div class="page-header-content">
+    <h2>{{ inventory_data.title }}</h2>
+
+    <p>
+      Manage spare parts, consumables, and office supplies inventory records.
+    </p>
+  </div>
+
+  <div class="page-header-actions">
+    <a href="{{ url_for('inventory.part_register') }}" class="btn-primary">
+      <i class="fa-solid fa-plus"></i>
+
+      Register Part
+    </a>
+
+    <button type="button" class="btn-secondary">
+      <i class="fa-solid fa-file-import"></i>
+
+      Import Excel
+    </button>
+
+    <button type="button" class="btn-secondary">
+      <i class="fa-solid fa-file-export"></i>
+
+      Export Excel
+    </button>
+  </div>
+</section>
+
+<section class="content-card">
+  <div class="table-header">
+    <div>
+      <h3>Parts Inventory</h3>
+
+      <span> Complete records of spare parts and consumable items. </span>
+    </div>
+
+    <div class="table-tools">
+      <input
+        type="search"
+        class="search-input"
+        id="partSearch"
+        placeholder="Search part code, number, description..."
+      />
+
+      <select class="filter-select" id="categoryFilter">
+        <option value="">All Categories</option>
+
+        <option value="Spare Parts">Spare Parts</option>
+
+        <option value="Consumables">Consumables</option>
+
+        <option value="Office Supplies">Office Supplies</option>
+      </select>
+
+      <select class="filter-select" id="statusFilter">
+        <option value="">All Status</option>
+
+        <option value="Available">Available</option>
+
+        <option value="Low Stock">Low Stock</option>
+
+        <option value="Out of Stock">Out of Stock</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+
+           <th>QR Code</th>
+
+          <th>Part Code</th>
+
+          <th>Category</th>
+
+          <th>Part Number</th>
+
+          <th>Description</th>
+
+          <th>Brand</th>
+
+          <th>Stock</th>
+
+          <th>Minimum</th>
+
+          <th>Location</th>
+
+          <th>Status</th>
+
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="partsTable">
+        {% if inventory_data.parts %} {% for part in inventory_data.parts %}
+
+        <tr>
+            <!-- QR CODE -->
+
+  <td>
+
+    {% if part.qr_code %}
+
+    <img
+      src="{{ url_for(
+        'static',
+        filename=part.qr_code
+      ) }}"
+      class="qr-preview"
+      alt="QR Code for {{ part.part_code }}"
+    />
+
+    {% else %}
+
+    <span class="qr-empty">
+
+      No QR
+
+    </span>
+
+    {% endif %}
+
+  </td>
+
+          <td>
+            <strong> {{ part.part_code }} </strong>
+          </td>
+
+          <td>{{ part.category }}</td>
+
+          <td>{{ part.part_number }}</td>
+
+          <td>
+            {{ part.description }} {% if part.compatible_model %}
+
+            <br />
+
+            <small> Compatible: {{ part.compatible_model }} </small>
+
+            {% endif %}
+          </td>
+
+          <td>{{ part.brand or "-" }}</td>
+
+          <td>{{ part.stock }}</td>
+
+          <td>{{ part.minimum_stock or 0 }}</td>
+
+          <td>{{ part.location or "-" }}</td>
+
+          <td>
+            <span class="status-badge"> {{ part.status }} </span>
+          </td>
+
+          <td>
+            <td>
+
+  <div class="action-buttons">
+
+
+    <!-- VIEW PART -->
+
+   <button
+  type="button"
+  class="action-btn view-btn"
+
+  data-part-code="{{ part.part_code }}"
+  data-category="{{ part.category }}"
+  data-part-number="{{ part.part_number }}"
+  data-description="{{ part.description }}"
+  data-brand="{{ part.brand or '' }}"
+  data-compatible-model="{{ part.compatible_model or '' }}"
+  data-supplier="{{ part.supplier or '' }}"
+  data-stock="{{ part.stock }}"
+  data-minimum-stock="{{ part.minimum_stock }}"
+  data-location="{{ part.location or '' }}"
+  data-status="{{ part.status }}"
+  data-remarks="{{ part.remarks or '' }}"
+
+  onclick="openViewPartModal(this)"
+>
+  <i class="fa-solid fa-eye"></i>
+</button>
+
+
+<a
+    href="{{ url_for(
+        'inventory.edit_part',
+        part_id=part.id
+    ) }}"
+    class="btn-icon"
+    title="Edit Part"
+>
+    <i class="fa-solid fa-pen"></i>
+</a>
+
+
+    <!-- VIEW QR -->
+
+    {% if part.qr_code %}
+
+    <a
+      href="{{ url_for(
+        'static',
+        filename=part.qr_code
+      ) }}"
+      target="_blank"
+      class="btn-icon"
+      title="View QR Code"
+    >
+
+      <i class="fa-solid fa-qrcode"></i>
+
+    </a>
+
+
+    <!-- PRINT QR -->
+
+    <a
+      href="{{ url_for(
+        'inventory.print_part_qr',
+        part_code=part.part_code
+      ) }}"
+      class="btn-icon"
+      title="Print QR Code"
+    >
+
+      <i class="fa-solid fa-print"></i>
+
+    </a>
+
+    {% endif %}
+
+
+    <!-- DELETE PART -->
+
+<button
+  type="button"
+  class="btn-icon delete-btn"
+  title="Delete Part"
+
+  data-part-code="{{ part.part_code }}"
+
+  data-part-name="{{ part.part_number }}"
+
+  onclick="openDeletePartModal(this)"
+>
+
+  <i class="fa-solid fa-trash"></i>
+
+</button>
+
+
+  </div>
+
+</td>
+          </td>
+        </tr>
+
+        {% endfor %} {% else %}
+
+        <tr>
+          <td colspan="11" class="empty-state">
+            <i class="fa-solid fa-box-open"></i>
+
+            <h4>No Parts Registered</h4>
+
+            <p>Start adding inventory parts to begin monitoring stock.</p>
+
+            <a
+              href="{{ url_for('inventory.part_register') }}"
+              class="btn-primary"
+            >
+              Register Part
+            </a>
+          </td>
+        </tr>
+
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-footer">
+    <span>
+      Showing {{ inventory_data.parts|length if inventory_data.parts else 0 }}
+      registered parts
+    </span>
+
+    <div class="pagination">
+      <button disabled>
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <button class="active">1</button>
+
+      <button>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================
+     DELETE PART CONFIRMATION MODAL
+================================== -->
+
+<div
+  id="deletePartModal"
+  class="delete-modal"
+  aria-hidden="true"
+>
+
+  <div class="delete-modal-overlay"></div>
+
+  <div
+    class="delete-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deletePartModalTitle"
+  >
+
+    <!-- ICON -->
+
+    <div class="delete-modal-icon">
+
+      <i class="fa-solid fa-trash"></i>
+
+    </div>
+
+
+    <!-- CONTENT -->
+
+    <h3 id="deletePartModalTitle">
+
+      Are you Sure to Delete Parts Item?
+
+    </h3>
+
+
+    <p>
+
+      Are you sure you want to delete
+
+      <strong id="deletePartName">
+
+        this part
+
+      </strong>?
+
+    </p>
+
+
+    <p class="delete-modal-warning">
+
+      This action cannot be undone.
+
+    </p>
+
+
+    <!-- ACTIONS -->
+
+    <div class="delete-modal-actions">
+
+      <button
+        type="button"
+        id="cancelDeletePart"
+        class="btn-primary"
+      >
+
+        Cancel
+
+      </button>
+
+
+      <button
+        type="button"
+        id="confirmDeletePart"
+        class="btn-danger"
+      >
+
+        <i class="fa-solid fa-trash"></i>
+
+        <span class="delete-button-text">
+
+          Delete Part
+
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ==================================
+     VIEW PART MODAL
+================================== -->
+
+<div
+  id="viewPartModal"
+  class="delete-modal view-part-modal"
+  aria-hidden="true"
+>
+
+  <!-- DARK BACKGROUND -->
+
+ <div
+  class="delete-modal-overlay"
+  onclick="closeViewPartModal()"
+></div>
+
+
+  <!-- MODAL CONTENT -->
+
+  <div
+  class="
+    delete-modal-card
+    view-part-card
+  "
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="viewPartTitle"
+>
+
+    <!-- HEADER -->
+
+    <div class="view-part-header">
+
+      <div>
+
+        <h3 id="viewPartTitle">
+
+          View Part Details
+
+        </h3>
+
+        <p>
+
+          Complete information for the selected part
+
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="view-part-close"
+        onclick="closeViewPartModal()"
+        aria-label="Close"
+      >
+
+        <i class="fa-solid fa-xmark"></i>
+
+      </button>
+
+    </div>
+
+
+    <!-- PART INFORMATION -->
+
+    <div class="view-part-section">
+
+      <h4>
+
+        Part Information
+
+      </h4>
+
+
+      <div class="view-part-grid">
+
+
+        <div class="form-group">
+
+          <label>
+
+            Part Code
+
+          </label>
+
+          <input
+            id="viewPartCode"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Category
+
+          </label>
+
+          <input
+            id="viewPartCategory"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Part Number
+
+          </label>
+
+          <input
+            id="viewPartNumber"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Description
+
+          </label>
+
+          <input
+            id="viewPartDescription"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Brand
+
+          </label>
+
+          <input
+            id="viewPartBrand"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Compatible Model
+
+          </label>
+
+          <input
+            id="viewPartCompatibleModel"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- STOCK INFORMATION -->
+
+    <div class="view-part-section">
+
+      <h4>
+
+        Stock Information
+
+      </h4>
+
+
+      <div class="view-part-grid">
+
+
+        <div class="form-group">
+
+          <label>
+
+            Current Stock
+
+          </label>
+
+          <input
+            id="viewPartStock"
+            type="number"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Minimum Stock
+
+          </label>
+
+          <input
+            id="viewPartMinimumStock"
+            type="number"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Location
+
+          </label>
+
+          <input
+            id="viewPartLocation"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+
+            Status
+
+          </label>
+
+          <input
+            id="viewPartStatus"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ADDITIONAL INFORMATION -->
+
+    <div class="view-part-section">
+
+      <h4>
+
+        Additional Information
+
+      </h4>
+
+
+      <div class="view-part-grid">
+
+
+        <div class="form-group">
+
+          <label>
+
+            Supplier
+
+          </label>
+
+          <input
+            id="viewPartSupplier"
+            type="text"
+            readonly
+          >
+
+        </div>
+
+
+        <div class="form-group full-width">
+
+          <label>
+
+            Remarks
+
+          </label>
+
+          <textarea
+            id="viewPartRemarks"
+            rows="4"
+            readonly
+          ></textarea>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FOOTER -->
+
+    <div class="view-part-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        onclick="closeViewPartModal()"
+      >
+
+        Close
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% block javascript %}
+
+<script
+  src="{{ url_for(
+    'static',
+    filename='js/parts_inventory.js'
+  ) }}"
+></script>
+
+
+
+{% endblock %}
+{% endblock %}
